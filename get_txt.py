@@ -55,6 +55,7 @@ def construct_url_strings(year, month, day, day_offset=0):
     url = f'{BASE_URL}/wxobs{year_str}{month_str}{day_str}.txt'
     return url
 
+
 def get_data(url, original_date):
     data = urllib.request.urlopen(url)
     data_arr = []
@@ -80,12 +81,9 @@ def get_txt_file(year, month, day):
 
     # the actual text filename on the website is party 1 day ahead
     url1  = construct_url_strings(year, month, day)
-    url2  = construct_url_strings(year, month, day+1)
 
     rows1 = get_data(url1, original_date)
-    rows2 = get_data(url2, original_date)
-    all_rows = rows1.extend(rows2)
-    df = pd.DataFrame(all_rows, columns=COLUMNS)
+    df = pd.DataFrame(rows1, columns=COLUMNS)
     return df
 
 
