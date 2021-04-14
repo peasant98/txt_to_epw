@@ -73,7 +73,7 @@ def get_data(url, original_date):
     return all_rows
 
 
-def get_txt_file(year, month, day):
+def get_txt_file_df(year, month, day):
     '''
     gets the text file with the desired year, month, and day
     '''
