@@ -3,7 +3,7 @@ gets the text files from
 https://sundowner.colorado.edu/weather/atoc1/archive_index.html
 '''
 
-import numpy as np
+import pandas as pd
 import urllib.request
 from datetime import datetime, timedelta
 
@@ -25,7 +25,7 @@ DAYS_IN_MONTH = {
 }
 
 # rows of the data
-ROWS = ['Date', 'Time', 'Temp Out', 'Hi Temp', 'Low Temp', 'Out Hum',
+COLUMNS = ['Date', 'Time', 'Temp Out', 'Hi Temp', 'Low Temp', 'Out Hum',
         'Dew Pt.', 'Wind Speed', 'Wind Dir', 'Wind Run', 'Hi Speed',
         'Hi Dir', 'Wind Chill', 'Heat Index', 'THW Index', 'THSW Index',
         'Bar', 'Rain', 'Rain Rate', 'Solar Rad.', 'Solar Energy',
@@ -34,12 +34,8 @@ ROWS = ['Date', 'Time', 'Temp Out', 'Hi Temp', 'Low Temp', 'Out Hum',
         'ET', 'Wind Samp', 'Wind Tx', 'ISS Recept', 'Arc. Int.']
 
 
-def get_txt_file(year, month, day):
-    '''
-    gets the text file with the desired year, month, and day
-    '''
-    # the actual text filename on the website is 1 day ahead
-    date_for_url = datetime(year=year, month=month, day=day) + timedelta(days=1)
+def construct_url_strings(year, month, day, day_offset=0):
+    date_for_url = datetime(year=year, month=month, day=day) + timedelta(days=day_offset)
 
     correct_year = date_for_url.year
 
@@ -57,17 +53,32 @@ def get_txt_file(year, month, day):
         day_str = f'0{day_str}'
 
     url = f'{BASE_URL}/wxobs{year_str}{month_str}{day_str}.txt'
+    return url
 
-    data = urllib.request.urlopen(url)
+def get_txt_file(year, month, day):
+    '''
+    gets the text file with the desired year, month, and day
+    '''
+    # the actual text filename on the website is party 1 day ahead
+    url1  = construct_url_strings(year, month, day)
+    url2  = construct_url_strings(year, month, day+1)
+
+
+    data = urllib.request.urlopen(url1)
     data_arr = []
     for line in data:
         data_arr.append(line)
 
-    for idx, row in enumerate(data_arr[3:]):
+    all_rows = []
+
+    for _, row in enumerate(data_arr[3:]):
         split_row = row.split()
+        # date datetime(year=year, month=month, day=day)
+        
         rows = [item.decode('UTF-8') for item in split_row]
-        print(len(rows))
-        print((rows))
+        all_rows.append(rows)
+
+    df = pd.DataFrame(all_rows, columns=COLUMNS)
 
 
 if __name__ == '__main__':
