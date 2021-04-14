@@ -55,16 +55,8 @@ def construct_url_strings(year, month, day, day_offset=0):
     url = f'{BASE_URL}/wxobs{year_str}{month_str}{day_str}.txt'
     return url
 
-def get_txt_file(year, month, day):
-    '''
-    gets the text file with the desired year, month, and day
-    '''
-    # the actual text filename on the website is party 1 day ahead
-    url1  = construct_url_strings(year, month, day)
-    url2  = construct_url_strings(year, month, day+1)
-
-
-    data = urllib.request.urlopen(url1)
+def get_data(url, original_date):
+    data = urllib.request.urlopen(url)
     data_arr = []
     for line in data:
         data_arr.append(line)
@@ -73,12 +65,28 @@ def get_txt_file(year, month, day):
 
     for _, row in enumerate(data_arr[3:]):
         split_row = row.split()
-        # date datetime(year=year, month=month, day=day)
-        
-        rows = [item.decode('UTF-8') for item in split_row]
-        all_rows.append(rows)
+        date = datetime.strptime(split_row[0].decode('UTF-8'), '%m/%d/%y')
+        if date == original_date:
+            rows = [item.decode('UTF-8') for item in split_row]
+            all_rows.append(rows)
+    return all_rows
 
+
+def get_txt_file(year, month, day):
+    '''
+    gets the text file with the desired year, month, and day
+    '''
+    original_date = datetime(year=year, month=month, day=day)
+
+    # the actual text filename on the website is party 1 day ahead
+    url1  = construct_url_strings(year, month, day)
+    url2  = construct_url_strings(year, month, day+1)
+
+    rows1 = get_data(url1, original_date)
+    rows2 = get_data(url2, original_date)
+    all_rows = rows1.extend(rows2)
     df = pd.DataFrame(all_rows, columns=COLUMNS)
+    return df
 
 
 if __name__ == '__main__':
