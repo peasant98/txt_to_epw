@@ -86,6 +86,3 @@ def get_txt_file_df(year, month, day):
     df = pd.DataFrame(rows1, columns=COLUMNS)
     return df
 
-
-if __name__ == '__main__':
-    get_txt_file(2020, 1, 1)
