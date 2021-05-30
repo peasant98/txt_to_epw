@@ -100,6 +100,7 @@ if __name__ == '__main__':
     # epw_df.loc[:, 'Wind Speed'] = test_series
     # print(epw_df['Wind Speed'])
 
+    # replace the year here
     year = 2018
 
     x = list(datetime_range(start=datetime(year, 1, 1), end=datetime(year, 12, 31)))
